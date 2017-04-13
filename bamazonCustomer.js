@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
-// function returns all itmes from bamazon_db.products table
+// function connects to bamazon_db and calls productTableDisplay function
 function querySelectAll() {
     connection.connect(function(err) {
         if (err) throw err;
@@ -19,7 +19,7 @@ function querySelectAll() {
     productTableDisplay();
 }
 
-
+//  function displays products from bamazon_db
 function productTableDisplay() {
     var query = "SELECT * FROM products";
     connection.query(query, function(err, initialResults) {
@@ -33,7 +33,7 @@ function productTableDisplay() {
     });
 }
 
-// function runs first menu for user purchase and verifies item is in stock
+// function runs menu for user purchase and verifies item is in stock
 function bamazonMenuStart(initialResults) {
     inquirer.prompt([{
         type: "input",
