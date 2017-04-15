@@ -46,10 +46,7 @@ function bamazonMenuStart(initialResults) {
     }, ]).then(function(UserPurchase) {
         var userItem = UserPurchase.userItemId;
         var userQty = UserPurchase.userPurchaseQty;
-        var itemToBePurchDesc = initialResults[userItem - 1].product_name;
-        var itemToBePurchAval = initialResults[userItem - 1].stock_quantity;
-        var itemToBePurcPrice = initialResults[userItem - 1].price;
-        if (UserPurchase.userItemId != initialResults[userItem - 1].item_id) {
+        if ((UserPurchase.userItemId > initialResults[initialResults.length - 1].item_id) || (UserPurchase.userItemId <= 0)) {
             inquirer.prompt([{
                 type: "list",
                 message: "Oh no!, looks like you chose an item number that's not on our list. Would you like to: ",
@@ -62,28 +59,16 @@ function bamazonMenuStart(initialResults) {
                     productTableDisplay();
                 }
             });
-        } else if (itemToBePurchAval < userQty) {
-            console.log("\nSorry insufficient quantity of " + itemToBePurchDesc + " to fulfill your order");
-            console.log("\n=======================================\n");
-            inquirer.prompt([{
-                type: "list",
-                message: "Oh no!, sorry we're out of that item would you like to: ",
-                choices: ["Return to order prompt", "I'm done get me out of here!"],
-                name: "choice"
-            }, ]).then(function(userOut) {
-                if (userOut.choice == "I'm done get me out of here!") {
-                    connection.destroy();
-                } else {
-                    productTableDisplay();
-                }
-            });
-        } else {
+        } else if ((userItem = initialResults[userItem - 1].item_id) && (userQty <= initialResults[initialResults.length - 1].item_id) && (userQty >= 1)) {
+            var itemToBePurchAval = initialResults[userItem - 1].stock_quantity;
+            var itemToBePurchDesc = initialResults[userItem - 1].product_name;
+            var itemToBePurcPrice = initialResults[userItem - 1].price;
             var adjQty = itemToBePurchAval - userQty;
             var userTotalPrice = itemToBePurcPrice * userQty;
             var queryDbQtyAdj = "UPDATE `bamazon_db`.`products` SET `stock_quantity`=" + "'" + adjQty + "'" + " WHERE `item_id`=" + "'" + userItem + "'";
             connection.query(queryDbQtyAdj, function(err, adjustResults) {
                 if (err) throw err;
-                console.log("\nOrder processed, your total today is $" + userTotalPrice);
+                console.log("\nOrder processed for " + itemToBePurchDesc + ", your total today is $" + userTotalPrice);
                 inquirer.prompt([{
                     type: "list",
                     message: "Awesome Choice I hope you enjoy, now what: ",
@@ -96,6 +81,21 @@ function bamazonMenuStart(initialResults) {
                         productTableDisplay();
                     }
                 });
+            });
+        } else if (initialResults[userItem - 1].stock_quantity < userQty) {
+            console.log("\nSorry insufficient quantity of " + initialResults[userItem - 1].product_name + " to fulfill your order");
+            console.log("\n=======================================\n");
+            inquirer.prompt([{
+                type: "list",
+                message: "Oh no!, sorry we're out of that item would you like to: ",
+                choices: ["Return to order prompt", "I'm done get me out of here!"],
+                name: "choice"
+            }, ]).then(function(userOut) {
+                if (userOut.choice == "I'm done get me out of here!") {
+                    connection.destroy();
+                } else {
+                    productTableDisplay();
+                }
             });
         }
     });
