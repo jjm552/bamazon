@@ -8,9 +8,9 @@ From CLI: bamazonCustomer.js (no function or arguments needed)
 ##
 
 ### Node packages used in this project:
-* mysql
-* inquirer
-* console.table
+* mysql - handles connection and querys to mySQL db
+* inquirer - user menu system - UI
+* console.table - converts mySQL return into formatted table for display in console
 
 All of these npm's are set as dependecies in package.json
 
